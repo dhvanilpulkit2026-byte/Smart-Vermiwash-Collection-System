@@ -1,3 +1,4 @@
 streamlit == 1.65.0
 pandas == 3.0.6
 supabase == 2.22.0
+gotrue == 2.4.2
