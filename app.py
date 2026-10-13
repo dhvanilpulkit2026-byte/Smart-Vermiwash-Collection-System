@@ -7,8 +7,8 @@ st.set_page_config(page_title="Soil Moisture Monitor", page_icon="🌱", layout=
 st.title("🌱 Real-Time Soil Moisture Dashboard")
 
 # Fetch credentials from Streamlit Secrets or hardcode for local testing
-SUPABASE_URL = st.secrets.get("SUPABASE_URL", "https://YOUR_PROJECT_REF.supabase.co")
-SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "YOUR_SUPABASE_ANON_KEY")
+SUPABASE_URL = st.secrets.sbURL
+SUPABASE_KEY = st.secrets.sbKEY
 
 @st.cache_resource
 def init_supabase():
