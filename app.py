@@ -4,7 +4,7 @@ import pandas as pd
 
 # Page configuration
 st.set_page_config(page_title="Soil Moisture Monitor", page_icon="🌱", layout="wide")
-st.title("🌱 Real-Time Soil Moisture Dashboard")
+st.title("Vermiwash Dashboard")
 
 # Fetch credentials from Streamlit Secrets or hardcode for local testing
 SUPABASE_URL = st.secrets.sbURL
