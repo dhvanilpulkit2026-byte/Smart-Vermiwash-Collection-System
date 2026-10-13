@@ -1,48 +1,49 @@
 import streamlit as st
+from supabase import create_client, Client
 import pandas as pd
-import requests
 
-# 1. Configuration (Paste your Supabase credentials here)
-SUPABASE_URL = "https://supabase.co*"
-SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"
+# Page configuration
+st.set_page_config(page_title="Soil Moisture Monitor", page_icon="🌱", layout="wide")
+st.title("🌱 Real-Time Soil Moisture Dashboard")
 
-HEADERS = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}"
-}
+# Fetch credentials from Streamlit Secrets or hardcode for local testing
+SUPABASE_URL = st.secrets.get("SUPABASE_URL", "https://YOUR_PROJECT_REF.supabase.co")
+SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "YOUR_SUPABASE_ANON_KEY")
 
-st.set_page_config(page_title="Smart Vermiwash System", layout="wide")
-st.title("🪱 Smart Vermiwash Telemetry Hub")
+@st.cache_resource
+def init_supabase():
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Fetch Logs from Database
-response = requests.get(SUPABASE_URL, headers=HEADERS)
+supabase = init_supabase()
 
-if response.status_code == 200 and len(response.json()) > 0:
-    data = response.json()
+# Fetch latest readings
+def load_data():
+    response = supabase.table("soil_moisture").select("*").order("created_at", desc=True).limit(50).execute()
+    data = response.data
     df = pd.DataFrame(data)
+    if not df.empty:
+        df["created_at"] = pd.to_datetime(df["created_at"])
+    return df
+
+df = load_data()
+
+if not df.empty:
+    latest = df.iloc[0]
     
-    # Process timestamps for charting
-    df['created_at'] = pd.to_datetime(df['created_at'])
-    df = df.sort_values(by='created_at', ascending=False)
-    
-    # Extract latest readings
-    latest_reading = df.iloc[0]
-    
-    # Metric Layout
-    col1, col2 = st.columns(2)
-    col1.metric(label="Compost Moisture Level", value=f"{latest_reading['moisture']}%")
-    col2.metric(label="Liquid Vermiwash pH", value=f"{latest_reading['ph']}")
-    
+    # Display Key Metrics
+    col1, col2, col3 = st.columns(3)
+    col1.metric(label="Latest Moisture Level", value=f"{latest['moisture_percent']}%")
+    col2.metric(label="Raw Sensor Value", value=latest['raw_value'])
+    col3.metric(label="Last Updated", value=latest['created_at'].strftime("%Y-%m-%d %H:%M:%S"))
+
     st.divider()
-    
-    # Dynamic Charts
-    st.subheader("📊 Historical Trends")
-    chart_df = df.set_index('created_at')
-    
-    tab1, tab2 = st.tabs(["Moisture History", "pH Stability"])
-    with tab1:
-        st.line_chart(chart_df['moisture'])
-    with tab2:
-        st.line_chart(chart_df['ph'])
+
+    # Moisture History Line Chart
+    st.subheader("Moisture History Trend")
+    st.line_chart(df.set_index("created_at")["moisture_percent"])
+
+    # Raw Data Table
+    st.subheader("Recent Sensor Logs")
+    st.dataframe(df)
 else:
-    st.warning("🔄 Database table is live, but waiting for initial sensor logs from the ESP32.")
+    st.info("No sensor readings found in Supabase table yet.")
