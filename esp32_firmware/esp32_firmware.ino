@@ -6,8 +6,8 @@ const char* WIFI_SSID = "OPPOA9";
 const char* WIFI_PASS = "k8kjcnnc";
 
 // Supabase Credentials
-const char* SUPABASE_URL = "https://vlmwhufipxoqvjyxmzlt.supabase.co/rest/v1/soil_moisture";
-const char* SUPABASE_KEY = "sb_publishable_l2VPDAgh0JBeni617fBUaA_plY_bPF_";
+const char* SUPABASE_URL = '<URL>';
+const char* SUPABASE_KEY = '<KEY>';
 
 // GPIO pin
 const int SENSOR_PIN = 1; 
